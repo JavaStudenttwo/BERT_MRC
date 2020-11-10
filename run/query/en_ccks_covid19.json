@@ -1,0 +1,22 @@
+{
+  "default": {
+    "Disease": "Diseases defined in medicine, such as covid-19, myocarditis, etc.",
+    "Phenotype": "clinical symptoms in the disease, such as fever, cough, chest tightness, etc.",
+    "Drug": "specific compound drugs or traditional Chinese medicine used for disease treatment, such as: redcivir, Lianhua Qingwen capsule, etc.",
+    "ChemicalCompound": "chemical element used in the synthesis of drugs.",
+    "Gene": "nucleotide sequence, such as ACE2, etc",
+    "Virus": "some microorganisms causing diseases, such as sars-cov-2, SARS, etc.",
+    "Organization": "Human organs, such as heart, brain, lung, kidney, etc",
+    "Chemical": "Chemicals, products made through the chemical industry"
+},
+  "labels": [
+    "Disease",
+    "Phenotype",
+    "Drug",
+    "ChemicalCompound",
+    "Gene",
+    "Virus",
+    "Organization",
+    "Chemical"
+  ]
+}
