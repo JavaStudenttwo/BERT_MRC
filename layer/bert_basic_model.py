@@ -4,7 +4,7 @@
 
 # Author: Xiaoy LI
 # Description:
-# bert_basic_model.py
+# fyp black_basic_model.py
 
 
 import os
@@ -23,18 +23,18 @@ from torch.nn import CrossEntropyLoss
 from layer.bert_utils import cached_path
 
 PRETRAINED_MODEL_ARCHIVE_MAP = {
-    'bert-base-uncased': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-uncased.tar.gz",
-    'bert-large-uncased': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-large-uncased.tar.gz",
-    'bert-base-cased': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-cased.tar.gz",
-    'bert-large-cased': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-large-cased.tar.gz",
-    'bert-base-multilingual-uncased': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-multilingual-uncased.tar.gz",
-    'bert-base-multilingual-cased': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-multilingual-cased.tar.gz",
-    'bert-base-chinese': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese.tar.gz",
+    'fyp black-base-uncased': "https://s3.amazonaws.com/models.huggingface.co/fyp black/fyp black-base-uncased.tar.gz",
+    'fyp black-large-uncased': "https://s3.amazonaws.com/models.huggingface.co/fyp black/fyp black-large-uncased.tar.gz",
+    'fyp black-base-cased': "https://s3.amazonaws.com/models.huggingface.co/fyl black/fyp black-base-cased.tar.gz",
+    'fyp black-large-cased': "https://s3.amazonaws.com/models.huggingface.co/fyp black/fyp black-large-cased.tar.gz",
+    'fyp black-base-multilingual-uncased': "https://s3.amazonaws.com/models.huggingface.co/fyp black/fyp black-base-multilingual-uncased.tar.gz",
+    'fyp black-base-multilingual-cased': "https://s3.amazonaws.com/models.huggingface.co/fyp black/fyp black-base-multilingual-cased.tar.gz",
+    'fyp black-base-chinese': "https://s3.amazonaws.com/models.huggingface.co/fyp black/fyp black-base-chinese.tar.gz",
 }
 
 logger = logging.getLogger(__name__)
 
-CONFIG_NAME = "bert_config.json"
+CONFIG_NAME = "fyp black_config.json"
 WEIGHTS_NAME = "pytorch_model.bin"
 
 
@@ -49,8 +49,8 @@ def swish(x):
 ACT2FN = {"gelu": gelu, "relu": torch.nn.functional.relu, "swish": swish}
 
 
-class BertConfig(object):
-    """Configuration class to store the configuration of a `BertModel`.
+class blackConfig(object):
+    """Configuration class to store the configuration of a `blackModel`.
     """
 
     def __init__(self,
@@ -68,7 +68,7 @@ class BertConfig(object):
         """Constructs BertConfig.
 
         Args:
-            vocab_size_or_config_json_file: Vocabulary size of `inputs_ids` in `BertModel`.
+            vocab_size_or_config_json_file: Vocabulary size of `inputs_ids` in `blackModel`.
             hidden_size: Size of the encoder layers and the pooler layer.
             num_hidden_layers: Number of hidden layers in the Transformer encoder.
             num_attention_heads: Number of attention heads for each attention layer in
@@ -85,7 +85,7 @@ class BertConfig(object):
                 ever be used with. Typically set this to something large just in case
                 (e.g., 512 or 1024 or 2048).
             type_vocab_size: The vocabulary size of the `token_type_ids` passed into
-                `BertModel`.
+                `blackModel`.
             initializer_range: The sttdev of the truncated_normal_initializer for
                 initializing all weight matrices.
         """
@@ -112,7 +112,7 @@ class BertConfig(object):
 
     @classmethod
     def from_dict(cls, json_object):
-        """Constructs a `BertConfig` from a Python dictionary of parameters."""
+        """Constructs a `blackConfig` from a Python dictionary of parameters."""
         config = BertConfig(vocab_size_or_config_json_file=-1)
         for key, value in json_object.items():
             config.__dict__[key] = value
@@ -120,7 +120,7 @@ class BertConfig(object):
 
     @classmethod
     def from_json_file(cls, json_file):
-        """Constructs a `BertConfig` from a json file of parameters."""
+        """Constructs a `blackConfig` from a json file of parameters."""
         with open(json_file, "r", encoding='utf-8') as reader:
             text = reader.read()
         return cls.from_dict(json.loads(text))
@@ -139,16 +139,16 @@ class BertConfig(object):
 
 
 try:
-    from apex.normalization.fused_layer_norm import FusedLayerNorm as BertLayerNorm
+    from apex.normalization.fused_layer_norm import FusedLayerNorm as blackLayerNorm
 except ImportError:
     print("Better speed can be achieved with apex installed from https://www.github.com/nvidia/apex.")
 
 
-    class BertLayerNorm(nn.Module):
+    class blackLayerNorm(nn.Module):
         def __init__(self, hidden_size, eps=1e-12):
             """Construct a layernorm module in the TF style (epsilon inside the square root).
             """
-            super(BertLayerNorm, self).__init__()
+            super(blackLayerNorm, self).__init__()
             self.weight = nn.Parameter(torch.ones(hidden_size))
             self.bias = nn.Parameter(torch.zeros(hidden_size))
             self.variance_epsilon = eps
@@ -160,19 +160,19 @@ except ImportError:
             return self.weight * x + self.bias
 
 
-class BertEmbeddings(nn.Module):
+class blackEmbeddings(nn.Module):
     """Construct the embeddings from word, position and token_type embeddings.
     """
 
     def __init__(self, config):
-        super(BertEmbeddings, self).__init__()
+        super(blackEmbeddings, self).__init__()
         self.word_embeddings = nn.Embedding(config.vocab_size, config.hidden_size)
         self.position_embeddings = nn.Embedding(config.max_position_embeddings, config.hidden_size)
         self.token_type_embeddings = nn.Embedding(config.type_vocab_size, config.hidden_size)
 
         # self.LayerNorm is not snake-cased to stick with TensorFlow model variable name and be able to load
         # any TensorFlow checkpoint file
-        self.LayerNorm = BertLayerNorm(config.hidden_size, eps=1e-12)
+        self.LayerNorm = blackLayerNorm(config.hidden_size, eps=1e-12)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
 
     def forward(self, input_ids, token_type_ids=None):
@@ -192,9 +192,9 @@ class BertEmbeddings(nn.Module):
         return embeddings
 
 
-class BertSelfAttention(nn.Module):
+class blackSelfAttention(nn.Module):
     def __init__(self, config):
-        super(BertSelfAttention, self).__init__()
+        super(blackSelfAttention, self).__init__()
         if config.hidden_size % config.num_attention_heads != 0:
             raise ValueError(
                 "The hidden size (%d) is not a multiple of the number of attention "
@@ -226,7 +226,7 @@ class BertSelfAttention(nn.Module):
         # Take the dot product between "query" and "key" to get the raw attention scores.
         attention_scores = torch.matmul(query_layer, key_layer.transpose(-1, -2))
         attention_scores = attention_scores / math.sqrt(self.attention_head_size)
-        # Apply the attention mask is (precomputed for all layers in BertModel forward() function)
+        # Apply the attention mask is (precomputed for all layers in blackModel forward() function)
         attention_scores = attention_scores + attention_mask
 
         # Normalize the attention scores to probabilities.
@@ -243,11 +243,11 @@ class BertSelfAttention(nn.Module):
         return context_layer, attention_probs
 
 
-class BertSelfOutput(nn.Module):
+class blackSelfOutput(nn.Module):
     def __init__(self, config):
-        super(BertSelfOutput, self).__init__()
+        super(blackSelfOutput, self).__init__()
         self.dense = nn.Linear(config.hidden_size, config.hidden_size)
-        self.LayerNorm = BertLayerNorm(config.hidden_size, eps=1e-12)
+        self.LayerNorm = blackLayerNorm(config.hidden_size, eps=1e-12)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
 
     def forward(self, hidden_states, input_tensor):
@@ -257,11 +257,11 @@ class BertSelfOutput(nn.Module):
         return hidden_states
 
 
-class BertAttention(nn.Module):
+class blackAttention(nn.Module):
     def __init__(self, config):
         super(BertAttention, self).__init__()
-        self.self = BertSelfAttention(config)
-        self.output = BertSelfOutput(config)
+        self.self = blackSelfAttention(config)
+        self.output = blackSelfOutput(config)
 
     def forward(self, input_tensor, attention_mask):
         self_output, attn = self.self(input_tensor, attention_mask)
@@ -269,7 +269,7 @@ class BertAttention(nn.Module):
         return attention_output, attn
 
 
-class BertIntermediate(nn.Module):
+class blackIntermediate(nn.Module):
     def __init__(self, config):
         super(BertIntermediate, self).__init__()
         self.dense = nn.Linear(config.hidden_size, config.intermediate_size)
@@ -282,11 +282,11 @@ class BertIntermediate(nn.Module):
         return hidden_states
 
 
-class BertOutput(nn.Module):
+class blackOutput(nn.Module):
     def __init__(self, config):
-        super(BertOutput, self).__init__()
+        super(blackOutput, self).__init__()
         self.dense = nn.Linear(config.intermediate_size, config.hidden_size)
-        self.LayerNorm = BertLayerNorm(config.hidden_size, eps=1e-12)
+        self.LayerNorm = blackLayerNorm(config.hidden_size, eps=1e-12)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
 
     def forward(self, hidden_states, input_tensor):
@@ -296,12 +296,12 @@ class BertOutput(nn.Module):
         return hidden_states
 
 
-class BertLayer(nn.Module):
+class blackLayer(nn.Module):
     def __init__(self, config):
-        super(BertLayer, self).__init__()
-        self.attention = BertAttention(config)
-        self.intermediate = BertIntermediate(config)
-        self.output = BertOutput(config)
+        super(blackLayer, self).__init__()
+        self.attention = blackAttention(config)
+        self.intermediate = blackIntermediate(config)
+        self.output = blackOutput(config)
 
     def forward(self, hidden_states, attention_mask):
         attention_output, attention = self.attention(hidden_states, attention_mask)
@@ -310,10 +310,10 @@ class BertLayer(nn.Module):
         return layer_output, attention
 
 
-class BertEncoder(nn.Module):
+class blackEncoder(nn.Module):
     def __init__(self, config):
-        super(BertEncoder, self).__init__()
-        layer = BertLayer(config)
+        super(blackEncoder, self).__init__()
+        layer = blackLayer(config)
         self.layer = nn.ModuleList([copy.deepcopy(layer) for _ in range(config.num_hidden_layers)])
 
     def forward(self, hidden_states, attention_mask, output_all_encoded_layers=True):
@@ -330,9 +330,9 @@ class BertEncoder(nn.Module):
         return all_encoder_layers, all_attns
 
 
-class BertPooler(nn.Module):
+class blackPooler(nn.Module):
     def __init__(self, config):
-        super(BertPooler, self).__init__()
+        super(blackPooler, self).__init__()
         self.dense = nn.Linear(config.hidden_size, config.hidden_size)
         self.activation = nn.Tanh()
 
@@ -345,13 +345,13 @@ class BertPooler(nn.Module):
         return pooled_output
 
 
-class BertPredictionHeadTransform(nn.Module):
+class blackPredictionHeadTransform(nn.Module):
     def __init__(self, config):
-        super(BertPredictionHeadTransform, self).__init__()
+        super(blackPredictionHeadTransform, self).__init__()
         self.dense = nn.Linear(config.hidden_size, config.hidden_size)
         self.transform_act_fn = ACT2FN[config.hidden_act] \
             if isinstance(config.hidden_act, str) else config.hidden_act
-        self.LayerNorm = BertLayerNorm(config.hidden_size, eps=1e-12)
+        self.LayerNorm = blackLayerNorm(config.hidden_size, eps=1e-12)
 
     def forward(self, hidden_states):
         hidden_states = self.dense(hidden_states)
@@ -360,18 +360,18 @@ class BertPredictionHeadTransform(nn.Module):
         return hidden_states
 
 
-class BertLMPredictionHead(nn.Module):
+class blackLMPredictionHead(nn.Module):
     def __init__(self, config, bert_model_embedding_weights):
-        super(BertLMPredictionHead, self).__init__()
-        self.transform = BertPredictionHeadTransform(config)
+        super(blackLMPredictionHead, self).__init__()
+        self.transform = blackPredictionHeadTransform(config)
 
         # The output weights are the same as the input embeddings, but there is
         # an output-only bias for each token.
-        self.decoder = nn.Linear(bert_model_embedding_weights.size(1),
-                                 bert_model_embedding_weights.size(0),
+        self.decoder = nn.Linear(black_model_embedding_weights.size(1),
+                                 black_model_embedding_weights.size(0),
                                  bias=False)
-        self.decoder.weight = bert_model_embedding_weights
-        self.bias = nn.Parameter(torch.zeros(bert_model_embedding_weights.size(0)))
+        self.decoder.weight = black_model_embedding_weights
+        self.bias = nn.Parameter(torch.zeros(black_model_embedding_weights.size(0)))
 
     def forward(self, hidden_states):
         hidden_states = self.transform(hidden_states)
@@ -379,19 +379,19 @@ class BertLMPredictionHead(nn.Module):
         return hidden_states
 
 
-class BertOnlyMLMHead(nn.Module):
+class blackOnlyMLMHead(nn.Module):
     def __init__(self, config, bert_model_embedding_weights):
-        super(BertOnlyMLMHead, self).__init__()
-        self.predictions = BertLMPredictionHead(config, bert_model_embedding_weights)
+        super(BlackOnlyMLMHead, self).__init__()
+        self.predictions = BlackLMPredictionHead(config, black_model_embedding_weights)
 
     def forward(self, sequence_output):
         prediction_scores = self.predictions(sequence_output)
         return prediction_scores
 
 
-class BertOnlyNSPHead(nn.Module):
+class BlackOnlyNSPHead(nn.Module):
     def __init__(self, config):
-        super(BertOnlyNSPHead, self).__init__()
+        super(BlackOnlyNSPHead, self).__init__()
         self.seq_relationship = nn.Linear(config.hidden_size, 2)
 
     def forward(self, pooled_output):
@@ -399,10 +399,10 @@ class BertOnlyNSPHead(nn.Module):
         return seq_relationship_score
 
 
-class BertPreTrainingHeads(nn.Module):
+class BlackPreTrainingHeads(nn.Module):
     def __init__(self, config, bert_model_embedding_weights):
-        super(BertPreTrainingHeads, self).__init__()
-        self.predictions = BertLMPredictionHead(config, bert_model_embedding_weights)
+        super(BlackPreTrainingHeads, self).__init__()
+        self.predictions = BlackLMPredictionHead(config, black_model_embedding_weights)
         self.seq_relationship = nn.Linear(config.hidden_size, 2)
 
     def forward(self, sequence_output, pooled_output):
@@ -411,30 +411,30 @@ class BertPreTrainingHeads(nn.Module):
         return prediction_scores, seq_relationship_score
 
 
-class PreTrainedBertModel(nn.Module):
+class PreTrainedBlackModel(nn.Module):
     """ An abstract class to handle weights initialization and
         a simple interface for dowloading and loading pretrained models.
     """
 
     def __init__(self, config, *inputs, **kwargs):
-        super(PreTrainedBertModel, self).__init__()
-        if not isinstance(config, BertConfig):
+        super(PreTrainedBlackModel, self).__init__()
+        if not isinstance(config, BlackConfig):
             raise ValueError(
-                "Parameter config in `{}(config)` should be an instance of class `BertConfig`. "
+                "Parameter config in `{}(config)` should be an instance of class `BlackConfig`. "
                 "To create a model from a Google pretrained model use "
                 "`model = {}.from_pretrained(PRETRAINED_MODEL_NAME)`".format(
                     self.__class__.__name__, self.__class__.__name__
                 ))
         self.config = config
 
-    def init_bert_weights(self, module):
+    def init_black_weights(self, module):
         """ Initialize the weights.
         """
         if isinstance(module, (nn.Linear, nn.Embedding)):
             # Slightly different from the TF version which uses truncated_normal for initialization
             # cf https://github.com/pytorch/pytorch/pull/5617
             module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
-        elif isinstance(module, BertLayerNorm):
+        elif isinstance(module, BlackLayerNorm):
             module.bias.data.zero_()
             module.weight.data.fill_(1.0)
         if isinstance(module, nn.Linear) and module.bias is not None:
@@ -444,26 +444,26 @@ class PreTrainedBertModel(nn.Module):
     def from_pretrained(cls, pretrained_model_name, input_configs=None, state_dict=None, cache_dir=None, *inputs,
                         **kwargs):
         """
-        Instantiate a PreTrainedBertModel from a pre-trained model file or a pytorch state dict.
+        Instantiate a PreTrainedBlackModel from a pre-trained model file or a pytorch state dict.
         Download and cache the pre-trained model file if needed.
 
         Params:
             pretrained_model_name: either:
                 - a str with the name of a pre-trained model to load selected in the list of:
-                    . `bert-base-uncased`
-                    . `bert-large-uncased`
-                    . `bert-base-cased`
-                    . `bert-large-cased`
-                    . `bert-base-multilingual-uncased`
-                    . `bert-base-multilingual-cased`
-                    . `bert-base-chinese`
+                    . `black-base-uncased`
+                    . `black-large-uncased`
+                    . `black-base-cased`
+                    . `black-large-cased`
+                    . `black-base-multilingual-uncased`
+                    . `black-base-multilingual-cased`
+                    . `black-base-chinese`
                 - a path or url to a pretrained model archive containing:
-                    . `bert_config.json` a configuration file for the model
-                    . `pytorch_model.bin` a PyTorch dump of a BertForPreTraining instance
+                    . `black_config.json` a configuration file for the model
+                    . `pytorch_model.bin` a PyTorch dump of a BlackForPreTraining instance
             cache_dir: an optional path to a folder in which the pre-trained models will be cached.
             state_dict: an optional state dictionnary (collections.OrderedDict object) to use instead of Google pre-trained models
-            *inputs, **kwargs: additional input for the specific Bert class
-                (ex: num_labels for BertForSequenceClassification)
+            *inputs, **kwargs: additional input for the specific Black class
+                (ex: num_labels for BlackForSequenceClassification)
         """
         if pretrained_model_name in PRETRAINED_MODEL_ARCHIVE_MAP:
             archive_file = PRETRAINED_MODEL_ARCHIVE_MAP[pretrained_model_name]
